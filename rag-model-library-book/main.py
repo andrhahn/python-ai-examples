@@ -4,8 +4,14 @@ from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_anthropic import ChatAnthropic
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.document_loaders import (
+    DirectoryLoader,
+    PyPDFLoader,
+    TextLoader,
+)
 from langchain_classic.chains import RetrievalQA
 from langchain_classic.prompts import PromptTemplate
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
@@ -17,8 +23,22 @@ llm = ChatAnthropic(
 vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embedder)
 
 if vectorstore._collection.count() == 0:
-    print("Vector store is empty. Run `python ingest.py` first.")
-    exit(1)
+    txt_loader = DirectoryLoader("./data", glob="**/*.txt", loader_cls=TextLoader)
+    pdf_loader = DirectoryLoader("./data", glob="**/*.pdf", loader_cls=PyPDFLoader)
+    docs = txt_loader.load() + pdf_loader.load()
+
+    if not docs:
+        print("No documents found in ./data — add .txt or .pdf files and rerun.")
+        exit(1)
+
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    chunks = splitter.split_documents(docs)
+    vectorstore.add_documents(chunks)
+    print(f"Ingested {len(chunks)} chunks from {len(docs)} document(s).")
+else:
+    print(
+        f"Vector store already has {vectorstore._collection.count()} chunks, skipping ingestion."
+    )
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
