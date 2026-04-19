@@ -29,9 +29,13 @@ cp .env.example .env
 
 ## Run
 
+Start the FastAPI server:
+
 ```bash
-python main.py
+uvicorn main:app --reload
 ```
+
+Then open `index.html` in your browser. The page connects to `http://localhost:8000/chat` and streams responses token by token.
 
 ## Linting
 

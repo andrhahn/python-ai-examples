@@ -1,0 +1,22 @@
+<!-- index.html - minimal UI -->
+<input id="input" type="text" placeholder="Type a message...">
+<button onclick="sendMessage()">Send</button>
+<div id="chat"></div>
+
+<script>
+async function sendMessage() {
+    const msg = document.getElementById('input').value;
+    document.getElementById('input').value = '';
+
+    const response = await fetch('http://localhost:8000/chat?message=' + encodeURIComponent(msg), { method: 'POST' });
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value);
+        document.getElementById('chat').innerHTML += text.replace('data: ', '');
+    }
+}
+</script>
