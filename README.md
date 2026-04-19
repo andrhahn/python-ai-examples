@@ -15,7 +15,7 @@ A collection of hands-on AI projects for building experience across core AI/ML c
 | [prompt-example](./prompt-example/) | Prompt engineering techniques |
 | [rag-model-example](./rag-model-example/) | Retrieval-Augmented Generation (RAG) basics |
 | [rag-model-library-book](./rag-model-library-book/) | RAG applied to a book/library use case |
-| [training-example](./training-example/) | Fine-tuning / training a model |
+| [fine-tuning-example](./fine-tuning-example/) | Fine-tuning a model |
 
 ## Prerequisites
 
@@ -143,7 +143,7 @@ cp .env.example .env
 | `ANTHROPIC_API_KEY` | agent, gen-ai, multi-agent, prompt, rag projects |
 | `ANTHROPIC_MODEL` | rag-model-example, rag-model-library-book |
 | `HF_EMBEDDING_MODEL` | rag-model-example, rag-model-library-book |
-| `OPENAI_API_KEY` | training-example |
+| `OPENAI_API_KEY` | fine-tuning-example |
 | `OLLAMA_BASE_URL` | integrate-custom-llm |
 | `OLLAMA_MODEL` | integrate-custom-llm |
 

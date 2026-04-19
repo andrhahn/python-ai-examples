@@ -15,7 +15,7 @@ Each subfolder is fully independent — separate venv, requirements.txt, and .en
 | prompt-example | Prompt engineering techniques |
 | rag-model-example | RAG pipeline basics |
 | rag-model-library-book | RAG applied to books/PDFs |
-| training-example | Fine-tuning a model |
+| fine-tuning-example | Fine-tuning a model |
 
 ## Python Toolchain
 

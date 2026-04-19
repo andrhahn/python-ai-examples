@@ -1,4 +1,4 @@
-# training-example
+# fine-tuning-example
 
 Demonstrates fine-tuning a model on a custom dataset and evaluating the result.
 
