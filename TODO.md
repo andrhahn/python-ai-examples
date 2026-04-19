@@ -32,5 +32,9 @@
 - [ ] 
 
 
+## chat-streaming-example
+- [ ] Deploy to Railway
+
+
 ## Backlog
 - [ ] Add example projects for remaining core AI/ML concepts

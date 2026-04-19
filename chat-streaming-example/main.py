@@ -2,6 +2,7 @@
 import os
 
 from anthropic import Anthropic
+from anthropic.types import WebSearchTool20250305Param
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,9 +29,16 @@ async def chat(message: str):
             model=MODEL,
             max_tokens=1024,
             messages=conversation_history,
+            tools=[
+                WebSearchTool20250305Param(
+                    type="web_search_20250305", name="web_search"
+                )
+            ],
         ) as stream:
             for text in stream.text_stream:
                 encoded = text.replace("\n", "\ndata: ")
                 yield f"data: {encoded}\n\n"
+            final = stream.get_final_message()
+            conversation_history.append({"role": "assistant", "content": final.content})
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
