@@ -37,3 +37,7 @@ python train.py
 # Step 3: evaluate the fine-tuned model
 python evaluate.py
 ```
+
+## Linting
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. See the root [README](../README.md#linting--formatting) for setup and usage instructions.

@@ -38,3 +38,7 @@ python ingest.py
 # Step 2: ask questions about the books
 python main.py
 ```
+
+## Linting
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. See the root [README](../README.md#linting--formatting) for setup and usage instructions.

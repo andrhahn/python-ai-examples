@@ -86,6 +86,23 @@ pip install -r requirements.txt
 
 Then follow the instructions in that folder's `README.md`.
 
+## Linting & Formatting
+
+Uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting (config in `ruff.toml`). To set up dev tooling from the repo root:
+
+```bash
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+Ruff will then run automatically on every commit. To run manually, execute from the repo root or any subfolder — ruff finds the config automatically:
+
+```bash
+ruff check .          # lint
+ruff check --fix .    # lint + auto-fix
+ruff format .         # format
+```
+
 ## Environment Variables
 
 Each project includes a `.env.example` listing the required keys. Copy it to `.env` and fill in your values — `.env` is gitignored and will never be committed.
