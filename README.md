@@ -66,7 +66,9 @@ pyenv install 3.12.4
 
 ## General Setup
 
-Each project has its own `requirements.txt`. The recommended pattern for any subfolder:
+### Running an example
+
+Each subfolder has its own `requirements.txt` and venv:
 
 ```bash
 # macOS / Linux
@@ -88,18 +90,29 @@ pip install -r requirements.txt
 
 Then follow the instructions in that folder's `README.md`.
 
-## Linting & Formatting
+### Dev tooling (ruff, pre-commit)
 
-Uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting (config in `ruff.toml`). Dev tooling is installed via a root-level venv:
+To use linting and formatting tools, set up a root-level venv once:
 
 ```bash
+# macOS / Linux
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements-dev.txt
 pre-commit install
 ```
 
-Ruff will then run automatically on every commit. To run manually, execute from the repo root or any subfolder — ruff finds the config automatically:
+```powershell
+# Windows (PowerShell)
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+## Linting & Formatting
+
+Uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting (config in `ruff.toml`). After completing dev tooling setup above, ruff runs automatically on every commit. To run manually, execute from the repo root or any subfolder — ruff finds the config automatically:
 
 ```bash
 ruff check .          # lint
