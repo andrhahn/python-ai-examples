@@ -30,6 +30,7 @@ async def chat(message: str):
             messages=conversation_history,
         ) as stream:
             for text in stream.text_stream:
-                yield f"data: {text}\n\n"
+                encoded = text.replace("\n", "\ndata: ")
+                yield f"data: {encoded}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
