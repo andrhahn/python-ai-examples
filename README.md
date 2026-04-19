@@ -141,7 +141,7 @@ cp .env.example .env
 | Variable | Used by |
 |----------|---------|
 | `ANTHROPIC_API_KEY` | agent, gen-ai, multi-agent, prompt, rag projects |
-| `OPENAI_API_KEY` | rag projects (embeddings), training |
+| `OPENAI_API_KEY` | rag-model-library-book (embeddings), training |
 | `OLLAMA_BASE_URL` | integrate-custom-llm |
 | `OLLAMA_MODEL` | integrate-custom-llm |
 
