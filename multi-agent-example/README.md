@@ -23,7 +23,7 @@ Copy `.env.example` to `.env` and fill in your API key:
 
 ```bash
 cp .env.example .env
-# edit .env and set ANTHROPIC_API_KEY or OPENAI_API_KEY
+# edit .env and set ANTHROPIC_API_KEY
 ```
 
 ## Run

@@ -20,7 +20,7 @@ A collection of hands-on AI projects for building experience across core AI/ML c
 ## Prerequisites
 
 - [pyenv](https://github.com/pyenv/pyenv) — manages the Python version (3.12.4 is pinned in `.python-version`)
-- An API key for your chosen LLM provider (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`)
+- An `ANTHROPIC_API_KEY` (most examples) — see the env vars table below
 
 ### Install pyenv
 
