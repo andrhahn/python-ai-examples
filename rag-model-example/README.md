@@ -1,6 +1,6 @@
 # RAG Model Example
 
-A basic Retrieval-Augmented Generation (RAG) pipeline: ingest documents, embed them, store in a vector DB, and answer questions grounded in the retrieved context.
+A basic Retrieval-Augmented Generation (RAG) pipeline: load documents, embed them, store in a vector DB, and answer questions grounded in the retrieved context.
 
 ## Concepts Covered
 
@@ -8,6 +8,15 @@ A basic Retrieval-Augmented Generation (RAG) pipeline: ingest documents, embed t
 - Generating and storing embeddings
 - Similarity search / retrieval
 - Grounded generation with retrieved context
+
+## Stack
+
+| Role | Library |
+|------|---------|
+| LLM | Claude (claude-sonnet-4-6) via `langchain-anthropic` |
+| Embeddings | `all-MiniLM-L6-v2` via `langchain-huggingface` (runs locally) |
+| Vector store | ChromaDB (persisted to `./chroma_db/`) |
+| Orchestration | LangChain Classic (`RetrievalQA`) |
 
 ## Setup
 
@@ -24,16 +33,21 @@ Copy `.env.example` to `.env` and fill in your API key:
 
 ```bash
 cp .env.example .env
-# edit .env and set OPENAI_API_KEY (used for embeddings)
+# edit .env and set ANTHROPIC_API_KEY
 ```
 
 ## Run
 
 ```bash
-# Step 1: ingest documents into the vector store
-python ingest.py
+python main.py
+```
 
-# Step 2: query the RAG pipeline
+On first run, `main.py` automatically ingests documents from `./docs/` into ChromaDB. Subsequent runs detect the populated store and skip ingestion.
+
+To re-ingest (e.g. after adding new docs):
+
+```bash
+rm -rf chroma_db/
 python main.py
 ```
 
