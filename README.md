@@ -144,3 +144,7 @@ cp .env.example .env
 | `OPENAI_API_KEY` | rag projects (embeddings), training |
 | `OLLAMA_BASE_URL` | integrate-custom-llm |
 | `OLLAMA_MODEL` | integrate-custom-llm |
+
+## License
+
+[MIT](LICENSE)
