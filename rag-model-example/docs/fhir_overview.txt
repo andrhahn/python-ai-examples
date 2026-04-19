@@ -1,0 +1,28 @@
+FHIR (Fast Healthcare Interoperability Resources) Overview
+
+FHIR is a standard for exchanging healthcare information electronically, developed by HL7 International. It defines a set of "resources" — modular units of healthcare data — that can be exchanged between systems using modern web technologies like REST APIs and JSON.
+
+Patient Data in FHIR
+
+The Patient resource is one of FHIR's core resources. It stores demographic information such as name, date of birth, gender, address, contact details, and identifiers (e.g., medical record numbers). Each Patient resource has a unique logical ID within a FHIR server.
+
+Patient data in FHIR is accessed via RESTful HTTP requests:
+- GET /Patient/{id} — retrieve a specific patient record
+- POST /Patient — create a new patient
+- PUT /Patient/{id} — update an existing patient
+- DELETE /Patient/{id} — remove a patient record
+
+FHIR and Privacy
+
+FHIR itself is a data format and API standard, not a privacy framework. Implementations must layer security on top, including OAuth 2.0 for authorization, TLS for transport encryption, and audit logging via the AuditEvent resource. SMART on FHIR is a widely adopted profile that defines how applications request scoped access to patient data.
+
+Key FHIR Resources Related to Patient Data
+
+- Patient — demographics and identifiers
+- Observation — clinical measurements (e.g., blood pressure, lab results)
+- Condition — diagnoses and problems
+- MedicationRequest — prescriptions and medication orders
+- Encounter — visits, admissions, or other clinical interactions
+- AllergyIntolerance — allergy and intolerance records
+
+FHIR R4 (Release 4) is the current widely adopted version. Resources are represented in JSON or XML and follow a consistent structure with metadata, narrative, and structured data fields.

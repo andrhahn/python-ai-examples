@@ -1,20 +1,38 @@
 # main.py
 import os
-from pinecone import Pinecone
-from langchain_pinecone import PineconeVectorStore
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_anthropic import ChatAnthropic
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_classic.chains import RetrievalQA
+from langchain_classic.prompts import PromptTemplate
 
-# --- Setup (same as before) ---
-pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
-index = pc.Index("my-demo-index")
+load_dotenv()
 
-embedder = OpenAIEmbeddings(api_key=os.environ["OPENAI_API_KEY"])
-llm = ChatOpenAI(model="gpt-4o", temperature=0, api_key=os.environ["OPENAI_API_KEY"])
+embedder = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+llm = ChatAnthropic(
+    model="claude-sonnet-4-6", temperature=0, api_key=os.environ["ANTHROPIC_API_KEY"]
+)
 
-# --- Build the retriever ---
-vectorstore = PineconeVectorStore(index=index, embedding=embedder)
+# --- Build the vector store ---
+vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embedder)
+
+# --- Ingest docs if store is empty ---
+if vectorstore._collection.count() == 0:
+    from langchain_community.document_loaders import DirectoryLoader, TextLoader
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+    loader = DirectoryLoader("./docs", glob="**/*.txt", loader_cls=TextLoader)
+    docs = loader.load()
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    chunks = splitter.split_documents(docs)
+    vectorstore.add_documents(chunks)
+    print(f"Ingested {len(chunks)} chunks from {len(docs)} document(s).")
+else:
+    print(
+        f"Vector store already has {vectorstore._collection.count()} chunks, skipping ingestion."
+    )
+
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 # --- Optional: custom prompt ---
