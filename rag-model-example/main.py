@@ -9,9 +9,9 @@ from langchain_classic.prompts import PromptTemplate
 
 load_dotenv()
 
-embedder = HuggingFaceEmbeddings(model_name=os.environ["EMBEDDING_MODEL"])
+embedder = HuggingFaceEmbeddings(model_name=os.environ["HF_EMBEDDING_MODEL"])
 llm = ChatAnthropic(
-    model=os.environ["LLM_MODEL"],
+    model=os.environ["ANTHROPIC_MODEL"],
     temperature=0,
     api_key=os.environ["ANTHROPIC_API_KEY"],
 )
