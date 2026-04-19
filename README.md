@@ -110,6 +110,15 @@ pip install -r requirements-dev.txt
 pre-commit install
 ```
 
+## Testing
+
+Uses [pytest](https://docs.pytest.org/). Each subfolder has a `tests/` directory. Run from any subfolder or the repo root:
+
+```bash
+pytest
+```
+
+
 ## Linting & Formatting
 
 Uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting (config in `ruff.toml`). After completing dev tooling setup above, ruff runs automatically on every commit. To run manually, execute from the repo root or any subfolder — ruff finds the config automatically:

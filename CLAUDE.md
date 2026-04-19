@@ -49,8 +49,18 @@ ruff format .        # format
 
 Pre-commit hook runs `ruff check --fix` and `ruff format` automatically on every commit.
 
+## Testing
+
+Uses [pytest](https://docs.pytest.org/). Each subfolder has a `tests/` directory. Run from any subfolder or the repo root:
+
+```bash
+pytest
+```
+
+
 ## Conventions
 
 - No co-author lines in commit messages
 - Keep each subfolder self-contained; no cross-subfolder imports
 - Entry points are `main.py` (and `ingest.py` for RAG projects)
+- Test files go in `tests/` within each subfolder, named `test_*.py`
