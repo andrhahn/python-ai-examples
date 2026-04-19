@@ -1,4 +1,4 @@
-# Tuning Example
+# Fine-Tuning Example
 
 A simple example of fine-tuning or training a model on a custom dataset, demonstrating the basics of the training loop and evaluation.
 
