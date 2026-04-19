@@ -9,6 +9,7 @@ A collection of hands-on AI projects for building experience across core AI/ML c
 | Folder | Concept |
 |--------|---------|
 | [agent-example](./agent-example/) | Building autonomous AI agents |
+| [chat-streaming-example](./chat-streaming-example/) | Streaming chat responses from an LLM |
 | [gen-ai-example](./gen-ai-example/) | Generative AI with LLMs |
 | [integrate-custom-llm](./integrate-custom-llm/) | Integrating a custom or self-hosted LLM |
 | [multi-agent-example](./multi-agent-example/) | Orchestrating multiple agents |
