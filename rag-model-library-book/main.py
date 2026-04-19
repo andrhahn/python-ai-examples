@@ -16,9 +16,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 load_dotenv()
 
 # --- Setup ---
-embedder = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+embedder = HuggingFaceEmbeddings(model_name=os.environ["EMBEDDING_MODEL"])
 llm = ChatAnthropic(
-    model="claude-sonnet-4-6", temperature=0, api_key=os.environ["ANTHROPIC_API_KEY"]
+    model=os.environ["LLM_MODEL"],
+    temperature=0,
+    api_key=os.environ["ANTHROPIC_API_KEY"],
 )
 
 # --- Build the vector store ---
