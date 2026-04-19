@@ -9,6 +9,15 @@ A RAG example scoped to a library/book use case: load one or more books (or a ca
 - Metadata filtering (author, title, chapter)
 - Conversational Q&A over a book corpus
 
+## Stack
+
+| Role | Library |
+|------|---------|
+| LLM | Claude (claude-sonnet-4-6) via `langchain-anthropic` |
+| Embeddings | `all-MiniLM-L6-v2` via `langchain-huggingface` (runs locally) |
+| Vector store | ChromaDB (persisted to `./chroma_db/`) |
+| Orchestration | LangChain Classic (`RetrievalQA`) |
+
 ## Setup
 
 > Requires [pyenv](https://github.com/pyenv/pyenv). See the root [README](../README.md) for installation instructions.
@@ -24,19 +33,26 @@ Copy `.env.example` to `.env` and fill in your API key:
 
 ```bash
 cp .env.example .env
-# edit .env and set OPENAI_API_KEY (used for embeddings)
+# edit .env and set ANTHROPIC_API_KEY
 ```
 
-Place your source book(s) (`.txt` or `.pdf`) in the `data/` directory.
+Place your source book(s) (`.txt` or `.pdf`) in the `data/` directory. A sample excerpt is included to get started.
 
 ## Run
 
 ```bash
-# Step 1: ingest books into the vector store
+# Step 1: ingest books into the vector store (run once, or after adding new books)
 python ingest.py
 
 # Step 2: ask questions about the books
 python main.py
+```
+
+To re-ingest after adding new books:
+
+```bash
+rm -rf chroma_db/
+python ingest.py
 ```
 
 ## Linting
