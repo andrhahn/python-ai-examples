@@ -41,18 +41,16 @@ Place your source book(s) (`.txt` or `.pdf`) in the `data/` directory. A sample 
 ## Run
 
 ```bash
-# Step 1: ingest books into the vector store (run once, or after adding new books)
-python ingest.py
-
-# Step 2: ask questions about the books
 python main.py
 ```
+
+On first run, `main.py` automatically ingests books from `./data/` into ChromaDB. Subsequent runs detect the populated store and skip ingestion.
 
 To re-ingest after adding new books:
 
 ```bash
 rm -rf chroma_db/
-python ingest.py
+python main.py
 ```
 
 ## Linting
