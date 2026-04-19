@@ -17,6 +17,8 @@ Demonstrates a basic RAG pipeline: ingest docs → embed → store in vector DB 
 
 ## Env Vars
 - `ANTHROPIC_API_KEY`
+- `ANTHROPIC_MODEL` (e.g. `claude-sonnet-4-6`)
+- `HF_EMBEDDING_MODEL` (e.g. `all-MiniLM-L6-v2`)
 
 ## Run
 ```bash

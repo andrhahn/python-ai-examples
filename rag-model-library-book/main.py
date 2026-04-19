@@ -1,81 +1,174 @@
-# main.py
+import json
 import os
+import time
+from collections import Counter
+
+import requests
 from dotenv import load_dotenv
-from langchain_chroma import Chroma
 from langchain_anthropic import ChatAnthropic
+from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.document_loaders import (
-    DirectoryLoader,
-    PyPDFLoader,
-    TextLoader,
-)
-from langchain_classic.chains import RetrievalQA
-from langchain_classic.prompts import PromptTemplate
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 
 load_dotenv()
 
-# --- Setup ---
+# --- Your reading history — edit this list ---
+READING_HISTORY = [
+    {"title": "The Name of the Wind", "author": "Patrick Rothfuss"},
+    {"title": "Dune", "author": "Frank Herbert"},
+    {"title": "The Left Hand of Darkness", "author": "Ursula K. Le Guin"},
+]
+
+TOP_N = 5
+
 embedder = HuggingFaceEmbeddings(model_name=os.environ["HF_EMBEDDING_MODEL"])
 llm = ChatAnthropic(
     model=os.environ["ANTHROPIC_MODEL"],
-    temperature=0,
     api_key=os.environ["ANTHROPIC_API_KEY"],
 )
+vectorstore = Chroma(
+    collection_name="reading_history",
+    persist_directory="./chroma_db",
+    embedding_function=embedder,
+)
 
-# --- Build the vector store ---
-vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embedder)
 
-# --- Ingest docs if store is empty ---
-if vectorstore._collection.count() == 0:
-    txt_loader = DirectoryLoader("./data", glob="**/*.txt", loader_cls=TextLoader)
-    pdf_loader = DirectoryLoader("./data", glob="**/*.pdf", loader_cls=PyPDFLoader)
-    docs = txt_loader.load() + pdf_loader.load()
-
-    if not docs:
-        print("No documents found in ./data — add .txt or .pdf files and rerun.")
-        exit(1)
-
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-    chunks = splitter.split_documents(docs)
-    vectorstore.add_documents(chunks)
-    print(f"Ingested {len(chunks)} chunks from {len(docs)} document(s).")
-else:
-    print(
-        f"Vector store already has {vectorstore._collection.count()} chunks, skipping ingestion."
+def fetch_ol_metadata(title, author):
+    resp = requests.get(
+        "https://openlibrary.org/search.json",
+        params={"title": title, "author": author, "limit": 1},
+        timeout=10,
     )
+    docs = resp.json().get("docs", [])
+    if not docs:
+        return f"{title} by {author}", []
 
-# --- Build the retriever ---
-retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+    doc = docs[0]
+    work_key = doc.get("key", "")
 
-# --- Optional: custom prompt ---
-prompt = PromptTemplate(
-    input_variables=["context", "question"],
-    template="""
-You are a helpful assistant. Use only the context below to answer the question.
-If the answer isn't in the context, say you don't know.
+    desc = f"{title} by {author}"
+    subjects = []
+    if work_key:
+        work = requests.get(
+            f"https://openlibrary.org{work_key}.json", timeout=10
+        ).json()
+        raw = work.get("description", "")
+        if isinstance(raw, dict):
+            raw = raw.get("value", "")
+        if raw:
+            desc = raw
+        subjects = work.get("subjects", [])[:15]
 
-Context:
-{context}
+    print(f"    subjects found: {subjects[:3]}")
+    return desc, subjects
 
-Question: {question}
-Answer:""",
-)
 
-# --- Wire it together ---
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    chain_type="stuff",  # "stuff" = shove all retrieved chunks into one prompt
-    retriever=retriever,
-    chain_type_kwargs={"prompt": prompt},
-    return_source_documents=True,  # so you can see what was retrieved
-)
+def index_reading_history():
+    if vectorstore._collection.count() > 0:
+        print(
+            f"Using existing index ({vectorstore._collection.count()} books). Delete ./chroma_db to re-index."
+        )
+        return
 
-# --- Ask a question ---
-query = "What is this book about?"
-result = qa_chain.invoke({"query": query})
+    docs = []
+    for book in READING_HISTORY:
+        print(f"  Fetching: {book['title']}...")
+        desc, subjects = fetch_ol_metadata(book["title"], book["author"])
+        time.sleep(0.5)
+        docs.append(
+            Document(
+                page_content=desc,
+                metadata={
+                    "title": book["title"],
+                    "author": book["author"],
+                    "subjects": json.dumps(subjects),
+                },
+            )
+        )
 
-print("Answer:", result["result"])
-print("\nSources:")
-for doc in result["source_documents"]:
-    print(" -", doc.page_content[:200])
+    vectorstore.add_documents(docs)
+    print(f"Indexed {len(docs)} books.\n")
+
+
+def get_top_subjects():
+    result = vectorstore._collection.get(include=["metadatas"])
+    subjects = []
+    for meta in result["metadatas"]:
+        subjects.extend(json.loads(meta.get("subjects", "[]")))
+    return [s for s, _ in Counter(subjects).most_common(10)]
+
+
+def fetch_candidates(subjects):
+    read_titles = {b["title"].lower() for b in READING_HISTORY}
+    candidates = {}
+    for subject in subjects[:6]:
+        slug = subject.lower().replace(" ", "_").replace(",", "")
+        resp = requests.get(
+            f"https://openlibrary.org/subjects/{slug}.json",
+            params={"limit": 20},
+            timeout=10,
+        )
+        time.sleep(0.5)
+        if resp.status_code != 200:
+            continue
+        for work in resp.json().get("works", []):
+            title = work.get("title", "")
+            if title.lower() in read_titles:
+                continue
+            key = work.get("key")
+            authors = [a.get("name", "") for a in work.get("authors", [])]
+            candidates[key] = {"title": title, "authors": authors}
+    return list(candidates.values())
+
+
+def rank_candidates(candidates):
+    scored = []
+    for book in candidates:
+        query = f"{book['title']} by {', '.join(book['authors'])}"
+        results = vectorstore.similarity_search_with_score(query, k=1)
+        if results:
+            score = results[0][1]  # L2 distance — lower = more similar
+            scored.append((score, book))
+    scored.sort(key=lambda x: x[0])
+    return [book for _, book in scored]
+
+
+def explain(book):
+    history = ", ".join(f"{b['title']} by {b['author']}" for b in READING_HISTORY)
+    authors = ", ".join(book["authors"]) or "unknown"
+    msg = (
+        f"Someone has read: {history}. "
+        f'In 2 sentences, explain why they might enjoy "{book["title"]}" by {authors}.'
+    )
+    return llm.invoke(msg).content
+
+
+def nypl_link(title):
+    from urllib.parse import quote
+
+    return f"https://borrow.nypl.org/search?query={quote(title)}&searchType=everything"
+
+
+def main():
+    print("Indexing reading history...")
+    index_reading_history()
+
+    subjects = get_top_subjects()
+    print(f"Top subjects: {subjects[:5]}")
+
+    print("\nFetching candidates from Open Library...")
+    candidates = fetch_candidates(subjects)
+    print(f"Found {len(candidates)} candidates. Ranking by similarity...")
+
+    ranked = rank_candidates(candidates)
+
+    print(f"\n--- Top {TOP_N} Recommendations ---\n")
+    for book in ranked[:TOP_N]:
+        authors = ", ".join(book["authors"]) or "unknown"
+        print(f"{book['title']} by {authors}")
+        print(f"  {explain(book)}")
+        print(f"  NYPL: {nypl_link(book['title'])}\n")
+
+
+if __name__ == "__main__":
+    main()
