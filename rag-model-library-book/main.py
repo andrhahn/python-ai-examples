@@ -15,13 +15,16 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
+# --- Setup ---
 embedder = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 llm = ChatAnthropic(
     model="claude-sonnet-4-6", temperature=0, api_key=os.environ["ANTHROPIC_API_KEY"]
 )
 
+# --- Build the vector store ---
 vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embedder)
 
+# --- Ingest docs if store is empty ---
 if vectorstore._collection.count() == 0:
     txt_loader = DirectoryLoader("./data", glob="**/*.txt", loader_cls=TextLoader)
     pdf_loader = DirectoryLoader("./data", glob="**/*.pdf", loader_cls=PyPDFLoader)
@@ -40,8 +43,10 @@ else:
         f"Vector store already has {vectorstore._collection.count()} chunks, skipping ingestion."
     )
 
+# --- Build the retriever ---
 retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
+# --- Optional: custom prompt ---
 prompt = PromptTemplate(
     input_variables=["context", "question"],
     template="""
@@ -55,14 +60,16 @@ Question: {question}
 Answer:""",
 )
 
+# --- Wire it together ---
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
-    chain_type="stuff",
+    chain_type="stuff",  # "stuff" = shove all retrieved chunks into one prompt
     retriever=retriever,
     chain_type_kwargs={"prompt": prompt},
-    return_source_documents=True,
+    return_source_documents=True,  # so you can see what was retrieved
 )
 
+# --- Ask a question ---
 query = "What is this book about?"
 result = qa_chain.invoke({"query": query})
 
