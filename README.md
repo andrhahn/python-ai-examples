@@ -2,6 +2,8 @@
 
 A collection of hands-on AI projects for building experience across core AI/ML concepts. Each subfolder is a self-contained example with its own dependencies and instructions.
 
+> `CLAUDE.md` files are included in each folder to provide context for [Claude Code](https://claude.ai/code) sessions. If you're using a different AI coding tool (Cursor, Copilot, Codex, etc.), these files can serve as a reference for project context.
+
 ## Projects
 
 | Folder | Concept |
