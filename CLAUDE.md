@@ -32,8 +32,10 @@ Each subfolder is fully independent — separate venv, requirements.txt, and .en
 
 Uses [ruff](https://docs.astral.sh/ruff/) for both linting and formatting. Config is at `ruff.toml` in the repo root and applies to all subfolders automatically.
 
-Dev dependencies (install once from repo root):
+Dev dependencies (install once from repo root via a root-level venv):
 ```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 pre-commit install   # sets up the git hook
 ```

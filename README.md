@@ -90,9 +90,11 @@ Then follow the instructions in that folder's `README.md`.
 
 ## Linting & Formatting
 
-Uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting (config in `ruff.toml`). To set up dev tooling from the repo root:
+Uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting (config in `ruff.toml`). Dev tooling is installed via a root-level venv:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 pre-commit install
 ```
