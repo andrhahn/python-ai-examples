@@ -111,6 +111,10 @@ pip install -r requirements-dev.txt
 pre-commit install
 ```
 
+> **Heads up:** The root venv is only for dev tooling. Don't activate it before running a project — each project needs its own `.venv`. If you activate the root venv by mistake, run `deactivate` then `source <project>/.venv/bin/activate` before running the project.
+>
+> To run ruff without activating the root venv, use the full path: `.venv/bin/ruff format .`
+
 ## Testing
 
 Uses [pytest](https://docs.pytest.org/). Each subfolder has a `tests/` directory. Run from any subfolder or the repo root:
