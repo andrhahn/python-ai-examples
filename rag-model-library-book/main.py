@@ -14,9 +14,19 @@ load_dotenv()
 
 # --- Your reading history — edit this list ---
 READING_HISTORY = [
-    {"title": "The Nightingale", "author": "Kristin Hannah"},
+    {"title": "The Once and Future Witches", "author": "Alix E. Harrow"},
+    {"title": "Magic Hour", "author": "Kristin Hannah"},
+    {"title": "The Four Winds", "author": "Kristin Hannah"},
     {"title": "The Missing Pages", "author": "Alyson Richman"},
+    {"title": "The Cuckoo's Calling", "author": "Robert Galbraith"},
+    {"title": "You Exist Too Much", "author": "Zaina Arafat"},
+    {"title": "We Used to Live Here", "author": "Marcus Kliewer"},
+    {"title": "Lilac Girls", "author": "Martha Hall Kelly"},
+    {"title": "Zodiac Academy: The Awakening", "author": "Caroline Peckham"},
+    {"title": "The Nightingale", "author": "Kristin Hannah"},
     {"title": "Braiding Sweetgrass", "author": "Robin Wall Kimmerer"},
+    {"title": "Wildwood Magic", "author": "Willa Reece"},
+    {"title": "All the Missing Girls", "author": "Megan Miranda"},
 ]
 
 TOP_N = 10
@@ -109,14 +119,16 @@ def fetch_ol_metadata(title, author):
 
 
 def index_reading_history():
-    if vectorstore._collection.count() > 0:
-        print(
-            f"Using existing index ({vectorstore._collection.count()} books). Delete ./chroma_db to re-index."
-        )
+    existing = vectorstore._collection.get(include=["metadatas"])
+    indexed_titles = {m["title"].lower() for m in existing["metadatas"]}
+    to_index = [b for b in READING_HISTORY if b["title"].lower() not in indexed_titles]
+
+    if not to_index:
+        print(f"Index up to date ({len(indexed_titles)} books).")
         return
 
     docs = []
-    for book in READING_HISTORY:
+    for book in to_index:
         print(f"  Fetching: {book['title']}...")
         desc, subjects = fetch_ol_metadata(book["title"], book["author"])
         time.sleep(0.5)
@@ -132,7 +144,9 @@ def index_reading_history():
         )
 
     vectorstore.add_documents(docs)
-    print(f"Indexed {len(docs)} books.\n")
+    print(
+        f"Indexed {len(docs)} new book(s). Total: {len(indexed_titles) + len(docs)}.\n"
+    )
 
 
 _GENERIC_SUBJECTS = {
