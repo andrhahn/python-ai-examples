@@ -14,23 +14,146 @@ from langchain_core.documents import Document
 load_dotenv()
 
 # --- Your reading history — edit this list ---
+# All books have description and subjects filled in manually.
+# Set description to None to have Open Library fetch it automatically instead.
 READING_HISTORY = [
-    {"title": "The Once and Future Witches", "author": "Alix E. Harrow"},
-    {"title": "Magic Hour", "author": "Kristin Hannah"},
-    {"title": "The Four Winds", "author": "Kristin Hannah"},
-    {"title": "The Missing Pages", "author": "Alyson Richman"},
-    {"title": "The Cuckoo's Calling", "author": "Robert Galbraith"},
-    {"title": "You Exist Too Much", "author": "Zaina Arafat"},
-    {"title": "We Used to Live Here", "author": "Marcus Kliewer"},
-    {"title": "Lilac Girls", "author": "Martha Hall Kelly"},
-    {"title": "Zodiac Academy: The Awakening", "author": "Caroline Peckham"},
-    {"title": "The Nightingale", "author": "Kristin Hannah"},
-    {"title": "Braiding Sweetgrass", "author": "Robin Wall Kimmerer"},
-    {"title": "Wildwood Magic", "author": "Willa Reece"},
-    {"title": "All the Missing Girls", "author": "Megan Miranda"},
-    {"title": "The Witches at the End of the World", "author": "Chelsea Iversen"},
-    {"title": "Never Lie", "author": "Freida McFadden"},
-    {"title": "Room 706", "author": "Ellie Levenson"},
+    {
+        "title": "The Once and Future Witches",
+        "author": "Alix E. Harrow",
+        "description": "Three sisters reunite in 1893 to revive the lost art of witchcraft, weaving it into the suffragette movement in a richly imagined alternate history of women's power and solidarity.",
+        "subjects": ["witches", "historical fiction", "feminism", "magic", "sisters"],
+    },
+    {
+        "title": "Magic Hour",
+        "author": "Kristin Hannah",
+        "description": "A feral child is discovered alone in the Pacific Northwest woods with no memory or language; a troubled psychiatrist moves home to help her and rediscovers what she's been running from.",
+        "subjects": [
+            "psychological fiction",
+            "family drama",
+            "Pacific Northwest",
+            "healing",
+        ],
+    },
+    {
+        "title": "The Four Winds",
+        "author": "Kristin Hannah",
+        "description": "During the Dust Bowl, a Texas woman must choose between the land her family has fought for and the promise of a better life in California, in a sweeping story of resilience and sacrifice.",
+        "subjects": [
+            "historical fiction",
+            "Dust Bowl",
+            "family",
+            "survival",
+            "Great Depression",
+        ],
+    },
+    {
+        "title": "The Missing Pages",
+        "author": "Alyson Richman",
+        "description": "A woman unravels the mystery behind a rare, incomplete manuscript and the wartime love story hidden within its missing pages, moving between past and present across two continents.",
+        "subjects": ["historical fiction", "WWII", "art", "love", "mystery"],
+    },
+    {
+        "title": "The Cuckoo's Calling",
+        "author": "Robert Galbraith",
+        "description": "War veteran and private detective Cormoran Strike is hired to investigate the apparent suicide of a supermodel, uncovering a darker story beneath the glamour of celebrity London.",
+        "subjects": ["mystery", "detective fiction", "crime thriller", "investigation"],
+    },
+    {
+        "title": "You Exist Too Much",
+        "author": "Zaina Arafat",
+        "description": "A Palestinian-American woman navigates queerness, obsessive love, disordered eating, and cultural identity across New York, the Middle East, and a treatment facility, in a raw and lyrical debut.",
+        "subjects": [
+            "LGBTQ fiction",
+            "identity",
+            "Palestinian-American",
+            "literary fiction",
+            "mental health",
+        ],
+    },
+    {
+        "title": "We Used to Live Here",
+        "author": "Marcus Kliewer",
+        "description": "A couple renovating their new home is visited by a family who claims to have lived there before — and as the visits grow stranger and more unsettling, reality itself begins to slip.",
+        "subjects": [
+            "psychological horror",
+            "suspense",
+            "haunted house",
+            "gaslighting",
+            "thriller",
+        ],
+    },
+    {
+        "title": "Lilac Girls",
+        "author": "Martha Hall Kelly",
+        "description": "Based on real people, this novel follows three women — a New York socialite, a Polish prisoner at Ravensbrück, and a German doctor — whose lives collide during and after WWII.",
+        "subjects": [
+            "historical fiction",
+            "WWII",
+            "women",
+            "concentration camps",
+            "survival",
+        ],
+    },
+    {
+        "title": "Zodiac Academy: The Awakening",
+        "author": "Caroline Peckham",
+        "description": "Four siblings with powerful magical abilities are forced into Zodiac Academy, a brutal school run by the ruling elite, where they must survive magical attacks, discover their heritage, and fight to reclaim what was taken from them.",
+        "subjects": ["fantasy", "magic", "academy", "siblings", "paranormal romance"],
+    },
+    {
+        "title": "The Nightingale",
+        "author": "Kristin Hannah",
+        "description": "Two sisters in Nazi-occupied France find their own paths of resistance and survival during WWII — one sheltering Jewish children, one becoming a legendary sniper — in a story of courage and loss.",
+        "subjects": ["historical fiction", "WWII", "sisters", "resistance", "France"],
+    },
+    {
+        "title": "Braiding Sweetgrass",
+        "author": "Robin Wall Kimmerer",
+        "description": "A botanist and member of the Potawatomi Nation weaves indigenous plant knowledge with Western science across lyrical essays exploring reciprocity, gratitude, and humanity's relationship with the natural world.",
+        "subjects": [
+            "nature writing",
+            "indigenous knowledge",
+            "ecology",
+            "botany",
+            "nonfiction",
+        ],
+    },
+    {
+        "title": "Wildwood Magic",
+        "author": "Willa Reece",
+        "description": "A woman inherits a family orchard in Appalachia and discovers a generations-old connection to the land's magic, healing traditions, and the witches who came before her.",
+        "subjects": ["witches", "Appalachia", "magic realism", "historical fiction"],
+    },
+    {
+        "title": "All the Missing Girls",
+        "author": "Megan Miranda",
+        "description": "Told in reverse chronological order, a woman returns to her small hometown a decade after her best friend's mysterious disappearance — only for another young woman to go missing the same week.",
+        "subjects": [
+            "mystery thriller",
+            "missing persons",
+            "small town",
+            "suspense",
+            "psychological fiction",
+        ],
+    },
+    {
+        "title": "The Witches at the End of the World",
+        "author": "Chelsea Iversen",
+        "description": "Two sisters with witch blood survive at the edge of a frozen, dying world — one embracing her power, one hiding it — until a stranger arrives and forces them to choose between love, loyalty, and survival.",
+        "subjects": ["witches", "sisters", "historical fiction", "survival", "magic"],
+    },
+    {
+        "title": "Never Lie",
+        "author": "Freida McFadden",
+        "description": "A newlywed discovers cassette tapes of therapy sessions recorded by a psychiatrist who vanished years ago, and becomes obsessed with uncovering the truth — until the past starts threatening her present.",
+        "subjects": ["psychological thriller", "mystery", "secrets", "suspense"],
+    },
+    {
+        "title": "Room 706",
+        "author": "Ellie Levenson",
+        "description": "A woman living a double life — devoted wife and secret lover — is trapped in a London hotel during a hostage crisis and forced to confront the choices she's made and who she really is.",
+        "subjects": ["psychological fiction", "marriage", "secrets", "thriller"],
+    },
 ]
 
 TOP_N = 10
@@ -73,11 +196,18 @@ def fetch_google_books_description(title, author):
 
 
 def fetch_ol_metadata(title, author):
-    resp = requests.get(
-        "https://openlibrary.org/search.json",
-        params={"title": title, "author": author, "limit": 1},
-        timeout=10,
-    )
+    try:
+        resp = requests.get(
+            "https://openlibrary.org/search.json",
+            params={"title": title, "author": author, "limit": 1},
+            timeout=10,
+        )
+    except requests.RequestException as e:
+        print(
+            f"    [miss] '{title}' — request error ({type(e).__name__}), using title/author only"
+        )
+        return f"{title} by {author}", []
+
     docs = resp.json().get("docs", [])
     if not docs:
         print(
@@ -92,9 +222,13 @@ def fetch_ol_metadata(title, author):
     desc = f"{title} by {author}"
     subjects = []
     if work_key:
-        work = requests.get(
-            f"https://openlibrary.org{work_key}.json", timeout=10
-        ).json()
+        try:
+            work = requests.get(
+                f"https://openlibrary.org{work_key}.json", timeout=10
+            ).json()
+        except requests.RequestException as e:
+            print(f"    [miss] '{title}' — work fetch error ({type(e).__name__})")
+            work = {}
         raw = work.get("description", "")
         if isinstance(raw, dict):
             raw = raw.get("value", "")
@@ -105,7 +239,7 @@ def fetch_ol_metadata(title, author):
                 f"    [miss] no description in work record for '{title}', trying Google Books..."
             )
             desc = fetch_google_books_description(title, author) or desc
-        subjects = work.get("subjects", [])[:15]
+        subjects = [s for s in work.get("subjects", [])[:15] if _is_usable_subject(s)]
     else:
         print(f"    [miss] no work key for '{title}'")
 
@@ -114,7 +248,7 @@ def fetch_ol_metadata(title, author):
         print(
             f"    [miss] no work subjects for '{title}', falling back to search subjects"
         )
-        subjects = doc.get("subject", [])[:15]
+        subjects = [s for s in doc.get("subject", [])[:15] if _is_usable_subject(s)]
     if not subjects:
         print(f"    [miss] no subjects found at all for '{title}'")
 
@@ -133,9 +267,13 @@ def index_reading_history():
 
     docs = []
     for book in to_index:
-        print(f"  Fetching: {book['title']}...")
-        desc, subjects = fetch_ol_metadata(book["title"], book["author"])
-        time.sleep(0.5)
+        if book.get("description"):
+            print(f"  Indexing: {book['title']}")
+            desc, subjects = book["description"], book.get("subjects", [])
+        else:
+            print(f"  Fetching: {book['title']}...")
+            desc, subjects = fetch_ol_metadata(book["title"], book["author"])
+            time.sleep(0.5)
         docs.append(
             Document(
                 page_content=desc,
@@ -159,18 +297,41 @@ _GENERIC_SUBJECTS = {
     "literature",
     "prose literature",
     "biography",
+    "history",
+    "women",
+    "men",
+    "american literature",
+    "english literature",
+    "british literature",
+    "canadian literature",
 }
+
+_NOISE_FRAGMENTS = [
+    "bestseller",
+    "large type",
+    "large print",
+    "award",
+    "prize",
+    "reading level",
+    "accelerated reader",
+    "juvenile",
+    "children",
+    "(ocolc)",
+    "protected daisy",
+]
 
 
 def _is_usable_subject(s):
     s_lower = s.lower()
     if s_lower in _GENERIC_SUBJECTS:
         return False
+    if s_lower.endswith("literature"):
+        return False
     if s_lower.startswith("fiction /") or s_lower.startswith("nonfiction /"):
         return False
-    if "fast (ocolc)" in s_lower or "(ocolc)" in s_lower:
-        return False
     if ":" in s_lower or "=" in s_lower:
+        return False
+    if any(fragment in s_lower for fragment in _NOISE_FRAGMENTS):
         return False
     return True
 
@@ -188,7 +349,7 @@ def get_top_subjects(per_book=4):
         if s not in seen:
             seen.add(s)
             deduped.append(s)
-    return deduped[:10]
+    return deduped[:15]
 
 
 def fetch_candidates(subjects, per_author_limit=2):
@@ -196,7 +357,7 @@ def fetch_candidates(subjects, per_author_limit=2):
     read_authors = {b["author"].lower() for b in READING_HISTORY}
     author_counts = Counter()
     candidates = {}
-    for subject in subjects[:6]:
+    for subject in subjects[:10]:
         slug = subject.lower().replace(" ", "_").replace(",", "")
         try:
             resp = requests.get(
@@ -205,7 +366,7 @@ def fetch_candidates(subjects, per_author_limit=2):
                 timeout=10,
             )
         except requests.exceptions.RequestException as e:
-            print(f"  [skip] Open Library unavailable for subject '{subject}': {e}")
+            print(f"  [skip] '{subject}' — request error ({type(e).__name__})")
             continue
         time.sleep(0.5)
         if resp.status_code != 200:
@@ -248,7 +409,7 @@ def fetch_work_details(ol_key, title=""):
                     f"    [miss] {label} — no description (have {len(subjects)} subjects)"
                 )
             else:
-                print(f"    [hit]  {label} — {len(raw)} chars")
+                print(f"    [hit]  {label}")
             return raw or "", subjects, publish_date
         except requests.RequestException as e:
             if attempt < 2:
@@ -264,18 +425,16 @@ def rank_candidates(candidates, description_fetch_limit=40):
         for b in candidates[:description_fetch_limit]
         if b.get("ol_key") and "description" not in b
     ]
-    print(f"Fetching descriptions for {len(to_fetch)} candidates in parallel...")
+    print(f"Fetching descriptions for {len(to_fetch)} candidates...")
 
-    def fetch_one(book):
+    for book in to_fetch:
         desc, subjects, publish_date = fetch_work_details(
             book["ol_key"], title=book["title"]
         )
         book["description"] = desc
         book["work_subjects"] = subjects
         book["publish_date"] = publish_date
-
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        list(executor.map(fetch_one, to_fetch))
+        time.sleep(0.5)
 
     scored = []
     for book in candidates:

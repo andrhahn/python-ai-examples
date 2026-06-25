@@ -56,3 +56,9 @@ python main.py
 ## Linting
 
 This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. See the root [README](../README.md#linting--formatting) for setup and usage instructions.
+
+## TODO
+
+- **Candidate caching** — cache the fully-fetched candidate list (title, description, subjects) in Redis with a configurable TTL so repeat runs skip the slow Open Library fetches. Cache key = hash of top subjects.
+- **UI — reading history input** — web UI where user enters a book title, Sonnet returns a list of authors to select from, then auto-populates the full reading history entry (description, subjects) via Claude.
+- **Google Books API key** — add a key to improve the fallback hit rate for books Open Library doesn't have.
