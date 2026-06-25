@@ -2,6 +2,7 @@ import json
 import os
 import time
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 from dotenv import load_dotenv
@@ -27,6 +28,9 @@ READING_HISTORY = [
     {"title": "Braiding Sweetgrass", "author": "Robin Wall Kimmerer"},
     {"title": "Wildwood Magic", "author": "Willa Reece"},
     {"title": "All the Missing Girls", "author": "Megan Miranda"},
+    {"title": "The Witches at the End of the World", "author": "Chelsea Iversen"},
+    {"title": "Never Lie", "author": "Freida McFadden"},
+    {"title": "Room 706", "author": "Ellie Levenson"},
 ]
 
 TOP_N = 10
@@ -166,6 +170,8 @@ def _is_usable_subject(s):
         return False
     if "fast (ocolc)" in s_lower or "(ocolc)" in s_lower:
         return False
+    if ":" in s_lower or "=" in s_lower:
+        return False
     return True
 
 
@@ -192,11 +198,15 @@ def fetch_candidates(subjects, per_author_limit=2):
     candidates = {}
     for subject in subjects[:6]:
         slug = subject.lower().replace(" ", "_").replace(",", "")
-        resp = requests.get(
-            f"https://openlibrary.org/subjects/{slug}.json",
-            params={"limit": 20},
-            timeout=10,
-        )
+        try:
+            resp = requests.get(
+                f"https://openlibrary.org/subjects/{slug}.json",
+                params={"limit": 20},
+                timeout=10,
+            )
+        except requests.exceptions.RequestException as e:
+            print(f"  [skip] Open Library unavailable for subject '{subject}': {e}")
+            continue
         time.sleep(0.5)
         if resp.status_code != 200:
             continue
@@ -218,40 +228,54 @@ def fetch_candidates(subjects, per_author_limit=2):
 
 
 def fetch_work_details(ol_key, title=""):
-    """Returns (description, subjects) from the OL work record."""
     label = f"'{title}'" if title else ol_key
-    try:
-        resp = requests.get(f"https://openlibrary.org{ol_key}.json", timeout=10)
-        if resp.status_code != 200:
-            print(f"    [miss] {resp.status_code} fetching details for {label}")
-            return "", []
-        work = resp.json()
-        raw = work.get("description", "")
-        if isinstance(raw, dict):
-            raw = raw.get("value", "")
-        subjects = work.get("subjects", [])[:8]
-        if not raw and not subjects:
-            print(f"    [miss] no description or subjects for {label}")
-        elif not raw:
-            print(
-                f"    [miss] no description for {label} (have {len(subjects)} subjects)"
-            )
-        else:
-            print(f"    [hit]  {label} — {len(raw)} chars")
-        return raw or "", subjects
-    except requests.RequestException as e:
-        print(f"    [miss] request error for {label}: {e}")
-        return "", []
+    for attempt in range(3):
+        try:
+            resp = requests.get(f"https://openlibrary.org{ol_key}.json", timeout=10)
+            if resp.status_code != 200:
+                print(f"    [miss] {label} — HTTP {resp.status_code}")
+                return "", []
+            work = resp.json()
+            raw = work.get("description", "")
+            if isinstance(raw, dict):
+                raw = raw.get("value", "")
+            subjects = work.get("subjects", [])[:8]
+            publish_date = work.get("first_publish_date", "")
+            if not raw and not subjects:
+                print(f"    [miss] {label} — no description or subjects")
+            elif not raw:
+                print(
+                    f"    [miss] {label} — no description (have {len(subjects)} subjects)"
+                )
+            else:
+                print(f"    [hit]  {label} — {len(raw)} chars")
+            return raw or "", subjects, publish_date
+        except requests.RequestException as e:
+            if attempt < 2:
+                time.sleep(2**attempt)
+            else:
+                print(f"    [miss] {label} — request error — ({type(e).__name__})")
+                return "", [], ""
 
 
 def rank_candidates(candidates, description_fetch_limit=40):
-    print(f"Fetching descriptions for up to {description_fetch_limit} candidates...")
-    for book in candidates[:description_fetch_limit]:
-        if book.get("ol_key") and "description" not in book:
-            desc, subjects = fetch_work_details(book["ol_key"], title=book["title"])
-            book["description"] = desc
-            book["work_subjects"] = subjects
-            time.sleep(0.4)
+    to_fetch = [
+        b
+        for b in candidates[:description_fetch_limit]
+        if b.get("ol_key") and "description" not in b
+    ]
+    print(f"Fetching descriptions for {len(to_fetch)} candidates in parallel...")
+
+    def fetch_one(book):
+        desc, subjects, publish_date = fetch_work_details(
+            book["ol_key"], title=book["title"]
+        )
+        book["description"] = desc
+        book["work_subjects"] = subjects
+        book["publish_date"] = publish_date
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(fetch_one, to_fetch))
 
     scored = []
     for book in candidates:
@@ -349,6 +373,9 @@ def main():
 
     print("\nFetching candidates from Open Library...")
     candidates = fetch_candidates(subjects)
+    if not candidates:
+        print("No candidates found — Open Library may be unavailable. Try again later.")
+        return
     print(f"Found {len(candidates)} candidates. Ranking by similarity...")
 
     ranked = rank_candidates(candidates)
@@ -358,11 +385,24 @@ def main():
     ranked = rerank_with_claude(ranked)
 
     print(f"\n--- Top {TOP_N} Recommendations ---\n")
-    for book in ranked[:TOP_N]:
-        authors = ", ".join(book["authors"]) or "unknown"
-        print(f"{book['title']} by {authors}")
-        print(f"  {explain(book)}")
-        print(f"  NYPL: {nypl_link(book['title'])}\n")
+    top = ranked[:TOP_N]
+    with ThreadPoolExecutor(max_workers=TOP_N) as executor:
+        explanations = list(executor.map(explain, top))
+    for book, explanation in zip(top, explanations):
+        authors = ", ".join(book["authors"]) or "Unknown"
+        genres = ", ".join(
+            s for s in book.get("work_subjects", []) if _is_usable_subject(s)
+        )[:120]
+        publish_date = book.get("publish_date", "")
+        print(f"Title:     {book['title']}")
+        print(f"Author:    {authors}")
+        if publish_date:
+            print(f"Published: {publish_date}")
+        if genres:
+            print(f"Genres:    {genres}")
+        print(f"Why:       {explanation}")
+        print(f"NYPL:      {nypl_link(book['title'])}")
+        print()
 
 
 if __name__ == "__main__":
