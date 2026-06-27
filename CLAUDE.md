@@ -62,5 +62,24 @@ pytest
 
 - No co-author lines in commit messages
 - Keep each subfolder self-contained; no cross-subfolder imports
+- Each example is a single file — all logic in `main.py`, no additional modules or subfolders
 - Entry points are `main.py` (and `ingest.py` for RAG projects)
 - Test files go in `tests/` within each subfolder, named `test_*.py`
+
+## Implementation Status
+
+All examples are single-file — logic lives in `main.py` only, no additional modules. Placeholder projects have an empty `main.py` (`# main.py`) — no need to read them.
+
+- **Implemented:** `rag-model-example`, `rag-model-library-book`, `chat-streaming-example`, `agent-example`
+- **Placeholders (empty `main.py`):** `gen-ai-example`, `multi-agent-example`, `prompt-example`, `fine-tuning-example`, `integrate-custom-llm`
+
+## Code Style Patterns
+
+Observed across all implemented projects — follow these when implementing placeholders:
+
+- `load_dotenv()` at module top, before any client init
+- Required env vars via `os.environ["KEY"]` — raises `KeyError` if missing (intentional, no defaults)
+- Module-level constants in `UPPERCASE`
+- Print-based status logging (no `logging` module)
+- Private helpers prefixed with `_`
+- No tests written yet — `tests/` dirs exist with only `__init__.py`
