@@ -46,5 +46,6 @@ Thumbs.db
 *.pt
 *.pth
 chroma_db/
+reading_history.json
 vectorstore/
 data/

@@ -1,22 +1,22 @@
-# RAG Model — Library Book
+# RAG Model — Library Book Recommender
 
-A RAG example scoped to a library/book use case: load one or more books (or a catalog), embed them, and answer natural-language questions about their content.
+A personalized book recommender that uses your reading history to find new books you'll love. It embeds your past reads into a vector store, pulls candidates from the Open Library API by subject, re-ranks them by semantic similarity, and uses Claude to write a short explanation for each recommendation.
 
 ## Concepts Covered
 
-- Ingesting long-form text (books, PDFs)
-- Chunking strategies for long documents
-- Metadata filtering (author, title, chapter)
-- Conversational Q&A over a book corpus
+- Semantic similarity search with ChromaDB + HuggingFace embeddings (runs locally, no API key)
+- Candidate sourcing from a public API (Open Library)
+- Two-stage ranking: vector similarity then LLM re-rank
+- Parallel API calls with `ThreadPoolExecutor`
 
 ## Stack
 
 | Role | Library |
 |------|---------|
-| LLM | Claude (claude-sonnet-4-6) via `langchain-anthropic` |
-| Embeddings | `all-MiniLM-L6-v2` via `langchain-huggingface` (runs locally) |
+| LLM | Claude via `langchain-anthropic` |
+| Embeddings | `all-MiniLM-L6-v2` via `langchain-huggingface` (local) |
 | Vector store | ChromaDB (persisted to `./chroma_db/`) |
-| Orchestration | LangChain Classic (`RetrievalQA`) |
+| Candidate source | Open Library Subjects API (no key needed) |
 
 ## Setup
 
@@ -29,14 +29,21 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and fill in your API key:
+Copy `.env.example` to `.env` and fill in your API keys:
 
 ```bash
 cp .env.example .env
-# edit .env and set ANTHROPIC_API_KEY
+# edit .env and set ANTHROPIC_API_KEY, ANTHROPIC_MODEL, HF_EMBEDDING_MODEL
 ```
 
-Place your source book(s) (`.txt` or `.pdf`) in the `data/` directory. A sample excerpt is included to get started.
+Copy `reading_history.example.json` to `reading_history.json` and replace the entries with books you've actually read:
+
+```bash
+cp reading_history.example.json reading_history.json
+# edit reading_history.json with your own books
+```
+
+Each entry requires `title`, `author`, `description`, and `subjects`. Set `description` to `null` to have Open Library fetch it automatically.
 
 ## Run
 
@@ -44,14 +51,7 @@ Place your source book(s) (`.txt` or `.pdf`) in the `data/` directory. A sample 
 python main.py
 ```
 
-On first run, `main.py` automatically ingests books from `./data/` into ChromaDB. Subsequent runs detect the populated store and skip ingestion.
-
-To re-ingest after adding new books:
-
-```bash
-rm -rf chroma_db/
-python main.py
-```
+On first run, `main.py` indexes your reading history into ChromaDB, then fetches candidates from Open Library, ranks them, and prints the top recommendations with NYPL links. Subsequent runs skip books already in the index — just add new entries to `reading_history.json` and re-run.
 
 ## Linting
 

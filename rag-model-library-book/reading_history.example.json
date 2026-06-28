@@ -1,0 +1,20 @@
+[
+    {
+        "title": "The Name of the Wind",
+        "author": "Patrick Rothfuss",
+        "description": "A legendary wizard recounts his extraordinary life in his own words — his childhood in a troupe of traveling players, his years at a renowned university, and his pursuit of the truth about the mysterious force that killed his family.",
+        "subjects": ["fantasy", "magic", "adventure", "coming-of-age"]
+    },
+    {
+        "title": "Station Eleven",
+        "author": "Emily St. John Mandel",
+        "description": "After a flu pandemic destroys civilization, a traveling theater company performs Shakespeare across the Great Lakes region, weaving together the stories of survivors connected to a famous actor who died the night the world ended.",
+        "subjects": ["post-apocalyptic", "literary fiction", "survival", "art", "interconnected stories"]
+    },
+    {
+        "title": "Pachinko",
+        "author": "Min Jin Lee",
+        "description": "An epic saga following four generations of a Korean family who immigrate to Japan, tracing their struggles with identity, discrimination, love, and sacrifice across the twentieth century.",
+        "subjects": ["historical fiction", "family saga", "Korea", "Japan", "identity"]
+    }
+]

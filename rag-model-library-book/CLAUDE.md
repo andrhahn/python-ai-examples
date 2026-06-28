@@ -17,7 +17,7 @@ Book recommender using Open Library metadata + semantic similarity + Claude expl
 - `HF_EMBEDDING_MODEL` (e.g. `all-MiniLM-L6-v2`)
 
 ## Customization
-Edit `READING_HISTORY` at the top of `main.py` — list of `{title, author}` dicts.
+Edit `reading_history.json` (gitignored, copy from `reading_history.example.json`). Each entry: `{title, author, description, subjects}`. Set `description` to `null` to have Open Library fetch it.
 
 ## Run
 ```bash
